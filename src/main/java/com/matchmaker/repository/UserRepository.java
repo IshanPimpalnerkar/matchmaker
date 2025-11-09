@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserProfile, Long> {
@@ -13,4 +14,5 @@ public interface UserRepository extends JpaRepository<UserProfile, Long> {
     List<UserProfile> findByCity(String city);
     List<UserProfile> findByReligion(String religion);
     List<UserProfile> findByCaste(String caste);
+    Optional<UserProfile> findByEmail(String email);
 }

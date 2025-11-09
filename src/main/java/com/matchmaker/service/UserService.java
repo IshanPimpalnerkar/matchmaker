@@ -4,7 +4,7 @@ import com.matchmaker.model.UserProfile;
 import com.matchmaker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +24,34 @@ public class UserService {
 
     public Optional<UserProfile> getById(Long id) {
         return userRepository.findById(id);
+    }
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public UserProfile registerUser(UserProfile user) {
+        // Check if user already exists
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("User with this email already exists");
+        }
+
+        // Hash password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    public UserProfile loginUser(String email, String password) {
+        Optional<UserProfile> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        UserProfile user = userOpt.get();
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        return user; // You could return a token or session later
     }
 
     public UserProfile update(Long id, UserProfile updatedUser) {

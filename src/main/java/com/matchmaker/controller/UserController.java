@@ -10,24 +10,65 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    // Create user
+    // ------------------------
+    // Register API
+    // ------------------------
+    @PostMapping("/register")
+    public ResponseEntity<UserProfile> register(@RequestBody UserProfile user) {
+        try {
+            UserProfile createdUser = userService.registerUser(user); // hashes password inside service
+            return ResponseEntity.ok(createdUser);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    // ------------------------
+    // Login API
+    // ------------------------
+    @PostMapping("/login")
+    public ResponseEntity<UserProfile> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            UserProfile user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(401).body(null);
+        }
+    }
+
+    // ------------------------
+    // DTO for login
+    // ------------------------
+    public static class LoginRequest {
+        private String email;
+        private String password;
+
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+    }
+
+    // ------------------------
+    // Existing CRUD APIs
+    // ------------------------
     @PostMapping
     public ResponseEntity<UserProfile> createUser(@RequestBody UserProfile user) {
         return ResponseEntity.ok(userService.save(user));
     }
 
-    // Get all users
     @GetMapping
     public List<UserProfile> getAllUsers() {
         return userService.getAll();
     }
 
-    // Get user by id
     @GetMapping("/{id}")
     public ResponseEntity<UserProfile> getUserById(@PathVariable Long id) {
         return userService.getById(id)
@@ -35,22 +76,21 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Update user
     @PutMapping("/{id}")
     public ResponseEntity<UserProfile> updateUser(@PathVariable Long id, @RequestBody UserProfile user) {
         UserProfile updated = userService.update(id, user);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
-    // Delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.delete(id);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
+    // ------------------------
     // Search APIs
-
+    // ------------------------
     @GetMapping("/search/gender")
     public List<UserProfile> searchByGender(@RequestParam String gender) {
         return userService.searchByGender(gender);
@@ -70,6 +110,13 @@ public class UserController {
     public List<UserProfile> searchByReligion(@RequestParam String religion) {
         return userService.searchByReligion(religion);
     }
+
+    // Simple Ping API
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
 
     @GetMapping("/search/caste")
     public List<UserProfile> searchByCaste(@RequestParam String caste) {

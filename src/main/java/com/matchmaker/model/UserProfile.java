@@ -19,6 +19,7 @@ public class UserProfile {
     private String caste;
     private String email;
     private String phone;
+    private String password;
 
     @ElementCollection
     @CollectionTable(name = "user_images", joinColumns = @JoinColumn(name = "user_id"))
@@ -40,6 +41,9 @@ public class UserProfile {
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public String getReligion() { return religion; }
     public void setReligion(String religion) { this.religion = religion; }
